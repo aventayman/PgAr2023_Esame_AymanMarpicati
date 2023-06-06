@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="aymanfplib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/aymanfplib.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
