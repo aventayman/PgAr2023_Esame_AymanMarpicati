@@ -5,8 +5,9 @@ public class Main {
         int numRoadMap = 10;
         Game game = new Game(numRoadMap);
         UserInteraction.printTitle();
-        for (int i = 0; i < 10; i++) {
-            UserInteraction.mainMenu(game);
+        for (int i = 0; i < 10 && game.getPlayer().getNumLives() != 0; i++) {
+            int choiceIndex = UserInteraction.mainMenu(game) - 1;
+            game.getMaps().get(choiceIndex).traverse(game.getPlayer(), game);
         }
     }
 }

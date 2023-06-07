@@ -39,4 +39,12 @@ public class Game {
     public List<RoadMap> getMaps() {
         return roadMapList;
     }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public int[] getScores() {
+        return scores;
+    }
 }
