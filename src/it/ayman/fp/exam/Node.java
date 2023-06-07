@@ -11,6 +11,7 @@ public class Node {
     private List<Node> connectedNodes;
     private Monster monster;
     private String name;
+    private int distance;
     private static final String[] fantasyCityNames = {
             "Eldoria",
             "Silvercrest",
@@ -158,5 +159,13 @@ public class Node {
 
     public void setMonster(Monster monster) {
         this.monster = monster;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
+    public int getDistance() {
+        return distance;
     }
 }

@@ -1,6 +1,5 @@
 package it.ayman.fp.exam;
 
-import com.sun.jdi.connect.AttachingConnector;
 import it.ayman.fp.lib.Menu;
 import it.ayman.fp.lib.RandomDraws;
 
@@ -21,6 +20,9 @@ public class RoadMap {
             "your health is now %d";
     private static final String ATTACK_MODIFIER = "You have stumbled upon an attack modifier of %d, " +
             "your attack is now %d";
+    private static final String MOST_PROMISING_NODE = "The most promising node is %s, you may follow my suggestion or" +
+            " continue on your own...";
+    private static final String MONSTER_DEFEATED = "You have destroyed the monster!!!";
 
 
     private final Map<Integer, Node> nodesMap;
@@ -128,6 +130,7 @@ public class RoadMap {
                 int distanceToNeighbor = distances.get(currentNode) + 1; // Assuming all edges have weight 1
 
                 if (distanceToNeighbor < distances.get(neighbor)) {
+                    currentNode.setDistance(distanceToNeighbor);
                     distances.put(neighbor, distanceToNeighbor);
                     pq.add(neighbor);
                 }
@@ -135,6 +138,20 @@ public class RoadMap {
         }
 
         return false;
+    }
+
+    private static Node findMostPromisingNode(List<Node> nodes) {
+        Node mostPromisingNode = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (Node node : nodes) {
+            int distance = node.getDistance();
+            if (distance < minDistance) {
+                minDistance = distance;
+                mostPromisingNode = node;
+            }
+        }
+        return mostPromisingNode;
     }
 
     private Node getStartNode(Map<Integer, Node> nodeMap) {
@@ -163,7 +180,7 @@ public class RoadMap {
         return nodesMap;
     }
 
-    public boolean traverse(Player player, Game game) throws InterruptedException {
+    public void traverse(Player player, Game game, int mapIndex) throws InterruptedException {
         Set<Node> visited = new HashSet<>();
         Node currentNode = getStartNode(nodesMap);
         visited.add(currentNode);
@@ -179,6 +196,7 @@ public class RoadMap {
                 }
             }
 
+            System.out.printf(MOST_PROMISING_NODE + "%n", findMostPromisingNode(possibleNodes).getName());
             Menu menu = new Menu(String.format(SELECT_NODE, currentNode.getName(), currentNode.getId()),
                     possibleNodeNames.toArray(new String[0]));
             int choiceIndex = menu.choose(true, false) - 1;
@@ -205,19 +223,19 @@ public class RoadMap {
                     player.setHp(20);
                     player.setAttack(5);
                     resetMonsters();
-                    return false;
+                    UserInteraction.printCurrentScore(game);
+                    return;
                 }
                 if (currentNode == getEndNode(nodesMap)) {
                     System.out.println(VICTORY);
-                    if (game.getScores()[choiceIndex] == 0)
-                        game.getScores()[choiceIndex] = getScore();
+                    if (game.getScores()[mapIndex] == 0)
+                        game.getScores()[mapIndex] = getScore();
                     resetMonsters();
-                    return true;
+                    UserInteraction.printCurrentScore(game);
+                    return;
                 }
             }
         }
-
-        return false;
     }
 
     private void resetMonsters() {
@@ -235,8 +253,10 @@ public class RoadMap {
         while (player.getHp() > 0 && monster.getHp() > 0) {
             monster.setHp(monster.getHp() - player.getAttack());
             System.out.printf((MONSTER_DAMAGE) + "%n", player.getAttack(), Math.max(monster.getHp(), 0));
-            if (monster.getHp() < 1)
+            if (monster.getHp() < 1) {
+                System.out.println(MONSTER_DEFEATED);
                 return true;
+            }
 
             Menu.wait(400);
 
