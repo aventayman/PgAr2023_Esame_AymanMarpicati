@@ -23,6 +23,10 @@ public class RoadMap {
     private static final String MOST_PROMISING_NODE = "The most promising node is %s, you may follow my suggestion or" +
             " continue on your own...";
     private static final String MONSTER_DEFEATED = "You have destroyed the monster!!!";
+    private static final int DELAY = 700;
+    private static final String SPACER = """
+            
+            """;
 
 
     private final Map<Integer, Node> nodesMap;
@@ -214,6 +218,7 @@ public class RoadMap {
      * @param mapIndex the index of the map that is being traversed
      */
     public void traverse(Player player, Game game, int mapIndex) throws InterruptedException {
+        System.out.println(SPACER);
         // A set with the already visited nodes inside the map
         Set<Node> visited = new HashSet<>();
 
@@ -223,6 +228,7 @@ public class RoadMap {
 
         // While the player is still alive we can continue traversing the map
         while (player.getHp() > 0) {
+            System.out.println(SPACER);
             // List of the possible nodes where the player can travel next
             List<Node> possibleNodes = new ArrayList<>();
             List<String> possibleNodeNames = new ArrayList<>();
@@ -250,6 +256,8 @@ public class RoadMap {
 
             // Adding the next node to the visited nodes
             visited.add(currentNode);
+
+            System.out.println(SPACER);
 
             // If there is a health modifier display it and let the player know his current hp level
             if (currentNode.getHealthModifier() != 0) {
@@ -287,6 +295,7 @@ public class RoadMap {
 
                     //Print the current score
                     UserInteraction.printCurrentScore(game);
+                    System.out.println(SPACER);
                     return;
                 }
                 if (currentNode == getEndNode(nodesMap)) {
@@ -300,6 +309,7 @@ public class RoadMap {
 
                     //Print the current score
                     UserInteraction.printCurrentScore(game);
+                    System.out.println(SPACER);
                     return;
                 }
             }
@@ -327,6 +337,7 @@ public class RoadMap {
      * @return if the player has won it returns true, otherwise it returns false
      */
     private boolean fight(Player player, Monster monster) throws InterruptedException {
+        System.out.println(SPACER);
         // While the player and the monster are both still alive
         while (player.getHp() > 0 && monster.getHp() > 0) {
             // Make the player attack the monster and record the result
@@ -340,7 +351,7 @@ public class RoadMap {
             }
 
             // Small delay to add some suspence
-            Menu.wait(400);
+            Menu.wait(DELAY);
 
             // Make the monster attack the player and record the result
             player.setHp(player.getHp() - monster.getAttack());
@@ -351,7 +362,7 @@ public class RoadMap {
                 return false;
 
             // Small delay to add some suspence
-            Menu.wait(400);
+            Menu.wait(DELAY);
         }
         return false;
     }

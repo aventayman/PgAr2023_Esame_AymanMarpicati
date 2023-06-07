@@ -1,5 +1,7 @@
 package it.ayman.fp.exam;
 
+import it.ayman.fp.lib.Menu;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         int numRoadMap = 10;
