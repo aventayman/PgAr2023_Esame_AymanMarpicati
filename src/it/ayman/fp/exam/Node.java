@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
-    private int id, healthModifier, attackModifier;
-    private String identifier;
-    private List<Node> connectedNodes;
+    private final int id;
+    private final int healthModifier;
+    private final int attackModifier;
+    private final String identifier;
+    private final List<Node> connectedNodes;
     private Monster monster;
-    private String name;
+    private final String name;
     private int distance;
     private static final String[] fantasyCityNames = {
             "Eldoria",

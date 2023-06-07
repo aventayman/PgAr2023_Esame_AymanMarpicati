@@ -3,8 +3,9 @@ package it.ayman.fp.exam;
 import it.ayman.fp.lib.RandomDraws;
 
 public class Monster {
-    private int hp, attack;
-    private String name;
+    private int hp;
+    private final int attack;
+    private final String name;
 
     private static final String[] monsterNames = {
             "Burrascoso",
@@ -75,15 +76,7 @@ public class Monster {
         return attack;
     }
 
-    public void setAttack(int attack) {
-        this.attack = attack;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

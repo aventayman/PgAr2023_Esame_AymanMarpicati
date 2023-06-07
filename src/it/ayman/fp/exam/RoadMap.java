@@ -78,22 +78,48 @@ public class RoadMap {
                     randomNode.addConnectedNode(node);
                 }
             }
+            // There has to be a path between the starting and the ending nodes
         } while (!hasPathBetween(nodeMap, getStartNode(nodeMap), getEndNode(nodeMap)));
 
         return nodeMap;
     }
 
+    /**
+     * A method that checks if there is a path between two nodes without the prerequisite that some nodes may
+     * have already been travelled in.
+     * @param nodeMap the map where to check
+     * @param startNode the starting node
+     * @param endNode the destination node
+     * @return if there is a path it returns true, otherwise false
+     */
     private boolean hasPathBetween(Map<Integer, Node> nodeMap, Node startNode, Node endNode) {
         // Set of visited nodes
         Set<Node> visited = new HashSet<>();
         return runDijkstra(nodeMap, startNode, endNode, visited);
     }
 
+    /**
+     * A method that checks if there is a path between two nodes and takes into account that some nodes may
+     * already have been travelled in
+     * @param nodeMap the map where to check
+     * @param startNode the starting node
+     * @param endNode the destination node
+     * @param previouslyVisited a set of previously visited nodes
+     * @return if there is a path it returns true, otherwise false
+     */
     private boolean hasPathBetween(Map<Integer, Node> nodeMap, Node startNode, Node endNode, Set<Node> previouslyVisited) {
         Set<Node> visited = new HashSet<>(previouslyVisited);
         return runDijkstra(nodeMap, startNode, endNode, visited);
     }
 
+    /**
+     * The algorithm of pathfinding
+     * @param nodeMap the map where to make the search
+     * @param startNode the starting node
+     * @param endNode the destination node
+     * @param visited the already visited nodes
+     * @return true if there is a path, otherwise false
+     */
     private boolean runDijkstra(Map<Integer, Node> nodeMap, Node startNode, Node endNode, Set<Node> visited) {
         // Check if startNode and endNode are the same node
         if (startNode == endNode) {
@@ -140,6 +166,11 @@ public class RoadMap {
         return false;
     }
 
+    /**
+     * A method to find the closest node to the destination node
+     * @param nodes a list of the nodes to take into consideration
+     * @return the closest node to the destination
+     */
     private static Node findMostPromisingNode(List<Node> nodes) {
         Node mostPromisingNode = null;
         int minDistance = Integer.MAX_VALUE;
@@ -176,61 +207,98 @@ public class RoadMap {
         return nodesMap.size();
     }
 
-    public Map<Integer, Node> getNodesMap() {
-        return nodesMap;
-    }
-
+    /**
+     * A method that makes the player traverse the map and interact with the monsters
+     * @param player the player that traverses the map
+     * @param game the current game
+     * @param mapIndex the index of the map that is being traversed
+     */
     public void traverse(Player player, Game game, int mapIndex) throws InterruptedException {
+        // A set with the already visited nodes inside the map
         Set<Node> visited = new HashSet<>();
+
+        // The current node that is being traversed
         Node currentNode = getStartNode(nodesMap);
         visited.add(currentNode);
 
+        // While the player is still alive we can continue traversing the map
         while (player.getHp() > 0) {
+            // List of the possible nodes where the player can travel next
             List<Node> possibleNodes = new ArrayList<>();
             List<String> possibleNodeNames = new ArrayList<>();
 
+            // We check all the nodes connected to the current node
             for (Node node : currentNode.getConnectedNodes()) {
+                // If the neighbouring node has already been visited or could lead to a dead end we discard it
+                // otherwise we add it to the possible nodes
                 if (!visited.contains(node) && hasPathBetween(nodesMap, node, getEndNode(nodesMap), visited)) {
                     possibleNodes.add(node);
                     possibleNodeNames.add(node.getName() + " (id: " + node.getId() + ")");
                 }
             }
 
+            // Printing the most promising node with the previous method
             System.out.printf(MOST_PROMISING_NODE + "%n", findMostPromisingNode(possibleNodes).getName());
+
+            // Making the player choose where to go next
             Menu menu = new Menu(String.format(SELECT_NODE, currentNode.getName(), currentNode.getId()),
                     possibleNodeNames.toArray(new String[0]));
             int choiceIndex = menu.choose(true, false) - 1;
 
+            // Changing the current node to the next node
             currentNode = possibleNodes.get(choiceIndex);
+
+            // Adding the next node to the visited nodes
             visited.add(currentNode);
 
+            // If there is a health modifier display it and let the player know his current hp level
             if (currentNode.getHealthModifier() != 0) {
                 player.setHp(player.getHp() + currentNode.getHealthModifier());
                 System.out.printf(HEALTH_MODIFIER + "%n", currentNode.getHealthModifier(), player.getHp());
             }
 
+            // If there is an attack modifier display it and let the player know his current attack level
             if (currentNode.getAttackModifier() != 0) {
                 player.setAttack(player.getAttack() + currentNode.getAttackModifier());
                 System.out.printf(ATTACK_MODIFIER + "%n", currentNode.getAttackModifier(), player.getAttack());
             }
 
+            // If there is a monster in the node
             if (currentNode.getMonster() != null) {
+
+                // Print all the info of the monster encounter
                 System.out.printf((MONSTER_ENCOUNTER) + "%n", currentNode.getMonster().getName());
+
+                // Let the monster and the player fight and record the result inside a variable
                 boolean playerVictory = fight(player, currentNode.getMonster());
+
+                // If the player has lost
                 if (!playerVictory) {
+                    // Diminish the number of lives
                     player.setNumLives(player.getNumLives() - 1);
                     System.out.printf((LIFE_LOST) + "%n", player.getNumLives());
+
+                    // Reset the player stats
                     player.setHp(20);
                     player.setAttack(5);
+
+                    // Reset the monsters' stats
                     resetMonsters();
+
+                    //Print the current score
                     UserInteraction.printCurrentScore(game);
                     return;
                 }
                 if (currentNode == getEndNode(nodesMap)) {
                     System.out.println(VICTORY);
+                    // If the player hasn't already beat that level add the score to the list
                     if (game.getScores()[mapIndex] == 0)
                         game.getScores()[mapIndex] = getScore();
+
+                    // Reset the monsters' stats
                     resetMonsters();
+
+                    //Print the current score
                     UserInteraction.printCurrentScore(game);
                     return;
                 }
@@ -238,6 +306,9 @@ public class RoadMap {
         }
     }
 
+    /**
+     * A method that resets the monsters' lives once the map has been traversed
+     */
     private void resetMonsters() {
         for (Node node : nodesMap.values()) {
             if (node.getMonster() != null && !node.getMonster().getName().equals(FINAL_BOSS)) {
@@ -249,25 +320,39 @@ public class RoadMap {
         }
     }
 
+    /**
+     * A method that reconstructs the battle between the player and the monster
+     * @param player the player
+     * @param monster the monster
+     * @return if the player has won it returns true, otherwise it returns false
+     */
     private boolean fight(Player player, Monster monster) throws InterruptedException {
+        // While the player and the monster are both still alive
         while (player.getHp() > 0 && monster.getHp() > 0) {
+            // Make the player attack the monster and record the result
             monster.setHp(monster.getHp() - player.getAttack());
             System.out.printf((MONSTER_DAMAGE) + "%n", player.getAttack(), Math.max(monster.getHp(), 0));
+
+            // If the monster has died let the player know
             if (monster.getHp() < 1) {
                 System.out.println(MONSTER_DEFEATED);
                 return true;
             }
 
+            // Small delay to add some suspence
             Menu.wait(400);
 
+            // Make the monster attack the player and record the result
             player.setHp(player.getHp() - monster.getAttack());
             System.out.printf((PLAYER_DAMAGE) + "%n", monster.getAttack(), Math.max(player.getHp(), 0));
+
+            // If the player has died let the player know
             if (player.getHp() < 1)
                 return false;
 
+            // Small delay to add some suspence
             Menu.wait(400);
         }
-
         return false;
     }
 }
