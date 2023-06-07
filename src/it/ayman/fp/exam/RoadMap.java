@@ -11,9 +11,11 @@ public class RoadMap {
 
 
     private final Map<Integer, Node> nodesMap;
+    private int score;
 
     public RoadMap(int numNodes) {
         nodesMap = generateNodeMap(numNodes);
+        score = getScore();
     }
 
     /**
@@ -43,7 +45,7 @@ public class RoadMap {
             for (Node node : nodeMap.values()) {
                 // The amount of connections is set randomly and logarithmically
                 // between 2 and the log(numNodes) so that it doesn't become too large
-                int numConnections = RandomDraws.drawInteger(1, (int) Math.floor(Math.log10(numNodes))) + 1;
+                int numConnections = RandomDraws.drawInteger(1, (int) Math.floor(Math.log(numNodes))) + 1;
 
                 // For every node we add the connections to other nodes
                 for (int i = 0; i < numConnections; i++) {
@@ -62,15 +64,6 @@ public class RoadMap {
                 }
             }
         } while (!hasPathBetween(nodeMap, getStartNode(nodeMap), getEndNode(nodeMap)));
-
-        for (Node node : nodeMap.values()) {
-            System.out.print("Node " + node.getId() + " (" + node.getIdentifier() + ") is connected to: ");
-            for (Node connectedNode : node.getConnectedNodes()) {
-                System.out.print(connectedNode.getId() + " ");
-            }
-            System.out.println();
-        }
-
 
         return nodeMap;
     }
@@ -141,9 +134,10 @@ public class RoadMap {
         return null; // If start node is not found
     }
 
-    public static void main(String[] args) {
-        new RoadMap(10);
+    public int getScore() {
+        return nodesMap.size();
     }
+
     public Map<Integer, Node> getNodesMap() {
         return nodesMap;
     }
